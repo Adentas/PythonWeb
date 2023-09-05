@@ -10,9 +10,57 @@ from colorama import init
 from src.goose_game import *
 import keyboard
 import os
+from abc import ABC, abstractmethod
 
 Use_Open_Ai = False
 work_books = None
+
+
+class UserInterface(ABC):
+    @abstractmethod
+    def display_contacts(self, contacts):
+        pass
+
+    @abstractmethod
+    def display_notes(self, notes):
+        pass
+
+    @abstractmethod
+    def display_command_menu(self):
+        pass
+
+    @abstractmethod
+    def get_user_input(self, prompt):
+        pass
+
+    @abstractmethod
+    def show_message(self, message):
+        pass
+
+class ConsoleUserInterface(UserInterface):
+    def display_contacts(self, contacts):
+        # Вивести контакти у консоль
+        for contact in contacts:
+            print(f"Name: {contact.name}, Phone: {contact.phone}, Email: {contact.email}")
+
+    def display_notes(self, notes):
+        # Вивести нотатки у консоль
+        for note in notes:
+            print(f"Title: {note.title}, Tag: {note.tag}, Description: {note.description}")
+
+    def display_command_menu(self):
+        # Вивести доступні команди у консоль
+        print("Available commands:")
+        # Додайте тут код для виведення списку команд
+
+    def get_user_input(self, prompt):
+        # Отримати введення користувача з консолі
+        return input(prompt)
+
+    def show_message(self, message):
+        # Вивести повідомлення користувачу
+        print(message)
+
 
 def use_open_ai():
     activated = activate_openai()
@@ -126,20 +174,33 @@ def main():
 
     keyboard.add_hotkey('esc', lambda: end_work())
 
+    user_interface = ConsoleUserInterface()
+
     global Use_Open_Ai
     while True:
-        # Get user input for a command
-        input_string = get_command_input("Enter a command: ")
+
+        # Вивести меню команд користувачу
+        user_interface.display_command_menu
+        
+        # Отримати команду користувача через інтерфейс
+        input_string = user_interface.get_user_input("Enter a command: ")
+
+        # # Get user input for a command
+        # input_string = get_command_input("Enter a command: ")
         # parse input function that get back command or None
         command = find_closest_command(input_string)
+        
+        
         if command:
             result = command_exe(command, a_book, n_book)
             if isinstance(result, list):
                 # Print each item in the result listc
                 for i in result:
-                    print(i)
+                    user_interface.show_message(i)
+                    # print(i)
             else:
-                print(result) if result else None
+                user_interface.show_message(result) if result else None
+                # print(result) if result else None
                 if result == "Starting the game...":
                     play()
                     end_work()
@@ -148,9 +209,12 @@ def main():
             if command["name"] == 'ending':
                 break
         elif Use_Open_Ai:
-            print(Fore.MAGENTA + input_answer_from_ai(input_string) + Style.RESET_ALL)
+            user_interface.show_message(input_answer_from_ai(input_string))
+            # print(Fore.MAGENTA + input_answer_from_ai(input_string) + Style.RESET_ALL)
         else:
-            print("Sorry, i don't understand this your command. Please try again.")
+            user_interface.show_message("Sorry, I don't understand this command. Please try again.")
+
+            # print("Sorry, i don't understand this your command. Please try again.")
 
     end_work()
 
