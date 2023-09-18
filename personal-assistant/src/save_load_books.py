@@ -4,8 +4,8 @@ import os
 import json
 import sys
 from pathlib import Path
-from src.memory import AddressBook
-from src.notes_core import Notebook, Note
+from memory import AddressBook
+from notes_core import Notebook, Note
 
 # Save and Load Address book when application begin and end work
 

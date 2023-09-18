@@ -1,13 +1,11 @@
-
-
-from src.commands import find_closest_command, get_command_input,get_command_input_agree
-from src.save_load_books import *
-from src.open_ai_input_assistent import *
-from src.memory import *
-from src.notes_core import Notebook,Tag
-from src.common_functions import STR_EPIC_ASSISTANT
+from commands import find_closest_command, get_command_input,get_command_input_agree
+from save_load_books import *
+from open_ai_input_assistent import *
+from memory import *
+from notes_core import Notebook,Tag
+from common_functions import STR_EPIC_ASSISTANT
 from colorama import init
-from src.goose_game import *
+from goose_game import *
 import keyboard
 import os
 from abc import ABC, abstractmethod
@@ -172,7 +170,7 @@ def main():
     a_book = work_books[0]
     n_book = work_books[1]
 
-    keyboard.add_hotkey('esc', lambda: end_work())
+    # keyboard.add_hotkey('esc', lambda: end_work())
 
     user_interface = ConsoleUserInterface()
 

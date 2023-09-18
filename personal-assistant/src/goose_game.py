@@ -25,8 +25,8 @@ def play():
 
     main_surface = pygame.display.set_mode(screen)
 
-    IMGS_PATH_GOOSE =  pkg_resources.resource_filename('src', 'game/goose/')
-    IMGS_PATH_GAME = pkg_resources.resource_filename('src', 'game/')
+    IMGS_PATH_GOOSE =  pkg_resources.resource_filename('game/goose/')
+    IMGS_PATH_GAME = pkg_resources.resource_filename('game/')
 
     # player = pygame.Surface((20, 20))
     # player.fill((WHITE))

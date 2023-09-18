@@ -5,10 +5,10 @@ from prompt_toolkit import prompt
 from prompt_toolkit.completion import WordCompleter
 from colorama import Fore,Style
 from prettytable import PrettyTable
-from src.common_functions import STR_EPIC_COMMANDS
-from src.memory import Record,SetterValueIncorrect,AddressBook,Phone
-from src.notes_core import *
-from src.sorter import sort_files_in_this_path
+from common_functions import STR_EPIC_COMMANDS
+from memory import Record,SetterValueIncorrect,AddressBook,Phone
+from notes_core import *
+from sorter import sort_files_in_this_path
 
 CHECK_SECOND_ARG_CHANGE_CONTACT = ("phone","email","birthday","address")
 CHECK_SECOND_ARG_CHANGE_NOTE = ("title","tag","description")

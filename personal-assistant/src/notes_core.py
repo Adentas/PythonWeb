@@ -1,6 +1,6 @@
 import json
 from colorama import Fore, Style
-from src.memory import SetterValueIncorrect
+from memory import SetterValueIncorrect
 
 
 class Tag:
