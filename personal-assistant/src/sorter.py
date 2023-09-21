@@ -3,7 +3,7 @@ import shutil
 from pathlib import Path
 import time
 import re
-
+from concurrent.futures import ThreadPoolExecutor
 
 def loading_bar(total, interval):
     for i in range(total):
@@ -106,6 +106,25 @@ def initialize_trans():
     for c, l in zip(CYRILLIC_SYMBOLS, TRANSLATION):
         TRANS[ord(c)] = l
         TRANS[ord(c.upper())] = l.upper()
+
+
+def process_folder(path):
+    """Обробити папку: перенести файли та обробити підпапки."""
+    try:
+        # Отримати список усіх файлів та папок у поточній директорії
+        items = os.listdir(path)
+        for item in items:
+            item_path = os.path.join(path, item)
+            if os.path.isfile(item_path):
+                # Якщо це файл, перенести його
+                move_file(item_path, destination_folder)
+            elif os.path.isdir(item_path):
+                # Якщо це папка, обробити її у новому потоці
+                with ThreadPoolExecutor() as executor:
+                    executor.submit(sort_files_in_this_path, item_path)
+    except Exception as e:
+        print(f"Помилка під час обробки папки {path}: {str(e)}")
+        
 
 def sort_files_in_this_path(path):
     initialize_trans()  # Initialize TRANS
