@@ -9,6 +9,7 @@ from goose_game import *
 import keyboard
 import os
 from abc import ABC, abstractmethod
+import multiprocessing
 
 Use_Open_Ai = False
 work_books = None
@@ -216,6 +217,41 @@ def main():
 
     end_work()
 
+def factorize(number):
+    factors = []
+    for i in range(1, number + 1):
+        if number % i == 0:
+            factors.append(i)
+    return factors
+
+def test_factorize():
+    a, b, c, d = factorize(128), factorize(255), factorize(99999), factorize(10651060)
+    assert a == [1, 2, 4, 8, 16, 32, 64, 128]
+    assert b == [1, 3, 5, 15, 17, 51, 85, 255]
+    assert c == [1, 3, 9, 41, 123, 271, 369, 813, 2439, 11111, 33333, 99999]
+    assert d == [1, 2, 4, 5, 7, 10, 14, 20, 28, 35, 70, 140, 76079, 152158, 304316, 380395, 532553, 760790, 1065106, 1521580, 2130212, 2662765, 5325530, 10651060]
+
+
+def parallel_factorize(number, pool_size=None):
+    if pool_size is None:
+        pool_size = multiprocessing.cpu_count()
+    pool = multiprocessing.Pool(pool_size)
+    factors = []
+    for i in range(1, number + 1):
+        if number % i == 0:
+            factors.append(i)
+    return factors
 
 if __name__ == '__main__':
+    test_factorize()
+    print("All tests passed for synchronous version.")
+
+    pool_size = multiprocessing.cpu_count()
+    a, b, c, d = parallel_factorize(128, pool_size), parallel_factorize(255, pool_size), parallel_factorize(99999, pool_size), parallel_factorize(10651060, pool_size)
+    assert a == [1, 2, 4, 8, 16, 32, 64, 128]
+    assert b == [1, 3, 5, 15, 17, 51, 85, 255]
+    assert c == [1, 3, 9, 41, 123, 271, 369, 813, 2439, 11111, 33333, 99999]
+    assert d == [1, 2, 4, 5, 7, 10, 14, 20, 28, 35, 70, 140, 76079, 152158, 304316, 380395, 532553, 760790, 1065106, 1521580, 2130212, 2662765, 5325530, 10651060]
+    print("All tests passed for parallel version.")
+    
     main()
