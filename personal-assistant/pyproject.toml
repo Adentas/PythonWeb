@@ -1,4 +1,4 @@
-[tool.poetry]
+yes[tool.poetry]
 name = "personal-assistant"
 version = "0.1.0"
 description = ""
