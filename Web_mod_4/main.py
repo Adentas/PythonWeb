@@ -3,7 +3,7 @@ from flask import Flask, render_template, request, redirect, url_for
 from datetime import datetime
 import socket
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='templates', static_folder='static')
 
 # Функція для обробки форми на сторінці message.html
 def handle_form(username, message):
