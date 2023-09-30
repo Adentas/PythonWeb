@@ -1,51 +1,155 @@
-import os
-from flask import Flask, render_template, request, redirect, url_for
+from http.server import HTTPServer, BaseHTTPRequestHandler
 from datetime import datetime
+from threading import Thread
+from pathlib import Path
+import urllib.parse
+import mimetypes
 import socket
+import pathlib
+import json
 
-app = Flask(__name__, template_folder='templates', static_folder='static')
 
-# Функція для обробки форми на сторінці message.html
-def handle_form(username, message):
-    timestamp = str(datetime.now())
-    data = {
-        timestamp: {
-            "username": username,
-            "message": message
+BASE_DIR = pathlib.Path()
+
+class MainServer(BaseHTTPRequestHandler):
+    def do_GET(self):
+        return self.router()
+    
+    def do_POST(self):
+        content_length = int(self.headers['Content-Length'])
+        post_data = self.rfile.read(content_length).decode('utf-8')
+        self.send_post_data_via_socket(post_data)
+        self.send_response(200)
+        self.send_header('Content-type', 'application/json')
+        self.end_headers()
+        response_data = json.dumps({"message": "POST request received"})
+        self.wfile.write(response_data.encode('utf-8'))
+    
+    def send_html_file(self, filename, status=200):
+        self.send_response(200)
+        self.send_header('Content-type', 'text/html')
+        self.end_headers()
+        with open(filename, 'rb') as fd:
+            self.wfile.write(fd.read())
+                                
+    def send_static(self, file):
+        self.send_response(200)
+        mt = mimetypes.guess_type(self.path)
+        if mt:
+            self.send_header('Content-type', mt[0])
+        else:
+            self.send_header('Content-type', 'text/plain')
+        self.end_headers()
+        with open(file, 'rb') as fd:
+            self.wfile.write(fd.read())
+    
+    
+    def router(self):
+        pr_url = urllib.parse.urlparse(self.path)
+        
+        match pr_url.path:
+            case '/':
+                self.send_html_file('index.html')
+            case '/message':
+                self.send_html_file('message.html')
+            case _:
+                file = BASE_DIR.joinpath(pr_url.path[1:])
+                if file.exists():
+                    self.send_static(file)
+                else:
+                    self.send_html_file('error.html', status=404)
+
+
+    def send_post_data_via_socket(self, message):
+        host = socket.gethostname()
+        port = 5000
+    
+        client_socket = socket.socket()
+        client_socket.connect((host, port))
+        
+        params = urllib.parse.parse_qs(message) # Parse the query string into a dictionary
+        
+        data = {
+            "username": params.get("username", [""])[0],
+            "message": params.get("message", [""])[0]
         }
-    }
-    return data
 
-# Відправлення даних на Socket сервер
-def send_to_socket_server(data):
-    server_ip = '127.0.0.1'  # IP адреса Socket сервера
-    server_port = 5000  # Порт Socket сервера
+        json_data = json.dumps(data) #Converting the dict to a JSON string. 
+        
+        client_socket.sendall(json_data.encode('utf-8')) #Sending the JSOn string
+        
+        
+        client_socket.close()
 
+                
+def server_socket():
+    print("Socket start listening")
+    host = socket.gethostname() 
+    port = 5000
+    
+    server_socket = socket.socket()
+    server_socket.bind((host, port))
+    server_socket.listen(2)
+    conn, address = server_socket.accept()
+    print(f"Connection from {address}")
+    while True:
+        post_data = conn.recv(1024).decode('utf-8')
+        if not post_data:
+            break
+        print(f'received message: {post_data}')
+        
+        try:
+            data = json.loads(post_data) #Converting a string to a dictionary
+            print("Decoded JSON data:", data)
+            
+            #Check if data is a dictionary before accessing keys
+            if isinstance(data, dict):
+                timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
+                data['timestamp'] = timestamp
+                #I know it's stupid :D
+                if "timestamp" in data:
+                    del data['timestamp']
+                    
+                with open('storage/data.json', 'r+') as f:
+                    stored_data = json.load(f) if f.readable() else {}
+                    stored_data[timestamp] = data
+                    f.seek(0)  
+                    json.dump(stored_data, f, indent=2)
+                print("Data successfully saved to data.json.")
+            else:
+                print("Received data is not a valid dictionary.")
+                
+        except json.JSONDecodeError:
+            print("Received data is not valid JSON.")
+            
+    conn.close()
+
+               
+def run(server_class=HTTPServer, handler_class=MainServer):
+    
+    directory_path = Path("storage")
+    if directory_path.exists():
+        print("Directory exists! ")
+    else:
+        print("Directory does not exists, creating...")
+        directory_path.mkdir(exist_ok=True)
+
+    server_adress = ('', 3000)
+    http = server_class(server_adress, handler_class)
     try:
-        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
-            s.sendto(data.encode(), (server_ip, server_port))
-    except Exception as e:
-        print(f"Error sending data to Socket server: {e}")
+        print("Start running...")
+        socket_sever = Thread(target=server_socket)
+        socket_sever.start()
+        http.serve_forever()
+    except KeyboardInterrupt:
+        http.server_close()
+        
 
-@app.route('/')
-def index():
-    return render_template('index.html')
-
-@app.route('/message', methods=['GET', 'POST'])
-def message():
-    if request.method == 'POST':
-        username = request.form['username']
-        message = request.form['message']
-
-        data = handle_form(username, message)
-        send_to_socket_server(str(data))
-
-        return redirect(url_for('index'))
-    return render_template('message.html')
-
-@app.errorhandler(404)
-def not_found(e):
-    return render_template('error.html'), 404
-
+def check_directory_existence(directory_path):
+    directory_path = Path("storage")
+    directory_path.mkdir(exist_ok=True)
+    data_file = directory_path / "data.json"
+    data_file.touch(exist_ok=True)
+    
 if __name__ == '__main__':
-    app.run(port=3000, threaded=True)  # Запуск HTTP сервера на порту 3000
+    run()
