@@ -1,4 +1,5 @@
 import sqlite3
+from data_creator import create_data
 
 # Підключення до бази даних
 conn = sqlite3.connect('university.db')
