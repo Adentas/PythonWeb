@@ -4,114 +4,88 @@ import sqlite3
 conn = sqlite3.connect('university.db')
 c = conn.cursor()
 
-# Виконання SQL запитів
-with open('query_1.sql', 'r') as file:
-    query_1 = file.read()
+# Функція для виконання запиту без параметрів
+def execute_query_without_params(query_number):
+    with open(f'query_{query_number}.sql', 'r') as file:
+        query = file.read()
 
-c.execute(query_1)
-result_1 = c.fetchall()
-print("Query 1 Result:")
-print(result_1)
+    c.execute(query)
+    result = c.fetchall()
+    print(f"Query {query_number} Result:")
+    print(result)
 
-file.close()
+# Функція для виконання запиту з одним параметром
+def execute_query_with_one_param(query_number, param1):
+    with open(f'query_{query_number}.sql', 'r') as file:
+        query = file.read()
 
-with open('query_2.sql', 'r') as file:
-    query_2 = file.read()
+    c.execute(query, (param1,))
+    result = c.fetchall()
+    print(f"Query {query_number} Result:")
+    print(result)
 
-param_value = input("Write subject... ")
-c.execute(query_2, (param_value,))
-result_2 = c.fetchall()
-print("Query 2 Result:")
-print(result_2)
+# Функція для виконання запиту з двома параметрами
+def execute_query_with_two_params(query_number, param1, param2):
+    with open(f'query_{query_number}.sql', 'r') as file:
+        query = file.read()
 
-file.close()
+    c.execute(query, (param1, param2))
+    result = c.fetchall()
+    print(f"Query {query_number} Result:")
+    print(result)
 
-with open('query_3.sql', 'r') as file:
-    query_3 = file.read()
+# Функція для виводу таблиці
+def execute_query_table(query_number):
+    with open(f'query_{query_number}.sql', 'r') as file:
+        queries = file.read().split(';')
 
-param_value = input("Write subject... ")
-c.execute(query_3, (param_value,))
-result_3 = c.fetchall()
-print("Query 3 Result:")
-print(result_3)
+    for query in queries:
+        if query.strip():  # Ігноруємо порожні запити
+            c.execute(query)
+            result = c.fetchall()
+            print(f"Query Result:")
+            print(result)
 
-file.close()
+# Головне меню програми
+while True:
+    print("Menu:")
+    print("0. Вивести таблицю university.db")
+    print("1. Знайти 5 студентів із найбільшим середнім балом з усіх предметів.")
+    print("2. Знайти студента із найвищим середнім балом з певного предмета. (параметр subject_id)")
+    print("3. Знайти середній бал у групах з певного предмета. (параметр subject_id)")
+    print("4. Знайти середній бал на потоці (по всій таблиці оцінок).")
+    print("5. Знайти, які курси читає певний викладач. (параметр teacher_name)")
+    print("6. Знайти список студентів у певній групі. (параметр group_name)")
+    print("7. Знайти оцінки студентів в окремій групі з певного предмета. (параметр1 group_name)(параметр2 subject_id)")
+    print("8. Знайти середній бал, який ставить певний викладач зі своїх предметів. (параметр teacher_name)")
+    print("9. Знайти список курсів, які відвідує студент. (параметр student_name)")
+    print("10.Список курсів, які певному студенту читає певний викладач. (параметр1 student_name)(параметр2 teacher_name)")
+    print("11.Середній бал, який певний викладач ставить певному студентові. (параметр1 teacher_name)(параметр2 student_id)")
+    print("12.Оцінки студентів у певній групі з певного предмета на останньому занятті. (параметр1 group_name)(параметр2 subject_name)")
+    print("13. Exit")
 
-with open('query_4.sql', 'r') as file:
-    query_4 = file.read()
+    choice = input("Enter your choice: ")
 
-c.execute(query_4)
-result_4 = c.fetchall()
-print("Query 4 Result:")
-print(result_4)
-
-file.close()
-
-with open('query_5.sql', 'r') as file:
-    query_5 = file.read()
-
-param_value = input("Write teachers... ")
-c.execute(query_5, (param_value,))
-result_5 = c.fetchall()
-print("Query 5 Result:")
-print(result_5)
-
-file.close()
-
-with open('query_6.sql', 'r') as file:
-    query_6 = file.read()
-
-param_value = input("Write group... ")
-c.execute(query_6, (param_value,))
-result_6 = c.fetchall()
-print("Query 6 Result:")
-print(result_6)
-
-file.close()
-
-with open('query_7.sql', 'r') as file:
-    query_7 = file.read()
-
-param1_value = input("Write group... ")
-param2_value = input("Write subject... ")
-c.execute(query_7, (param1_value, param2_value))
-result_7 = c.fetchall()
-print("Query 7 Result:")
-print(result_7)
-
-file.close()
-
-with open('query_8.sql', 'r') as file:
-    query_8 = file.read()
-
-param_value = input("Write teacher... ")
-c.execute(query_8, (param_value,))
-result_8 = c.fetchall()
-print("Query 8 Result:")
-print(result_8)
-
-file.close()
-
-with open('query_9.sql', 'r') as file:
-    query_9 = file.read()
-
-param_value = input("Write student... ")
-c.execute(query_9, (param_value,))
-result_9 = c.fetchall()
-print("Query 9 Result:")
-print(result_9)
-
-file.close()
-
-with open('query_10.sql', 'r') as file:
-    query_10 = file.read()
-
-param1_value = input("Write student... ")
-param2_value = input("Write teacher... ")
-c.execute(query_10, (param1_value, param2_value))
-result_10 = c.fetchall()
-print("Query 10 Result:")
-print(result_10)
+    if choice.isdigit():
+        choice = int(choice)
+        if choice == 13:
+            break
+        elif 0 <= choice <= 12:
+            if choice in [2, 3, 5, 6, 8, 9]:
+                param1 = input("Enter parameter: ")
+                execute_query_with_one_param(choice, param1)
+            elif choice in [7, 10, 11, 12]:
+                param1 = input("Enter first parameter: ")
+                param2 = input("Enter second parameter: ")
+                execute_query_with_two_params(choice, param1, param2)
+            elif choice in [0]:
+                execute_query_table(choice)
+            else:
+                execute_query_without_params(choice)
+        else:
+            print("Invalid choice. Please try again.")
+    else:
+        print("Invalid input. Please enter a number.")
 
 file.close()
 
