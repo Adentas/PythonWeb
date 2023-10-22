@@ -1,0 +1,7 @@
+mongoengine
+configparser
+redis
+redis-lru
+pika
+Faker
+pymongo
