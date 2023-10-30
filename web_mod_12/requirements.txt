@@ -1,0 +1,9 @@
+alembic
+psycopg2
+uvicorn
+fastapi
+libgravatar
+python-jose
+passlib
+python-multipart
+jwt
